@@ -1,5 +1,5 @@
 import fs from 'fs';
-import { AuctionItemsMap } from './auction-items-map';
+import { AuctionItemsMap, MinPriceMaxStack } from '../auction-items-map';
 
 export const cache: {
     prices: AuctionItemsMap
@@ -7,12 +7,7 @@ export const cache: {
     prices: null
 };
 
-export function watchAuctioneerFile(path: string, callback: (auctionRecords: AuctionItemsMap) => void) {
-    fs.watchFile(path, async () => {
-        const map = parseLuaFile(path);
-        callback(map);
-    });
-}
+
 
 export function parseLuaFile(content: string) {
     const reg = /(?<=return {)(.|\s)+(?=,}",\s--)/g;
@@ -26,18 +21,16 @@ export function parseLuaFile(content: string) {
         .replace(/nil/g, null)
         .replace(/,]/g, ']');
 
-    fs.writeFileSync('temp.txt', `[${parsedData}]`);
-
     const recordsArray = JSON.parse(`[${parsedData}]`);
     const map: AuctionItemsMap = {};
     for (const recordArray of recordsArray) {
-        map[recordArray[8]] = map[recordArray[8]] || { orders: [] };
+        map[recordArray[8]] = map[recordArray[8]] || { orders: [], minPriceMaxStack: {} };
         map[recordArray[8]].orders.push({
             name: recordArray[8],
             amount: recordArray[10],
             bid: recordArray[14],
             buyout: recordArray[16],
-            seller: recordArray[19]
+            seller: recordArray[19],
         });
     }
 
@@ -53,7 +46,23 @@ export function parseLuaFile(content: string) {
             value.medianPrice = value.orders[Math.round(numberOfOrders / 2) - 1].buyout;
         }
 
-        value.minStackPrice = value.orders.reduce((minBuyout, order) => order.amount === 20 && order.buyout < minBuyout ? order.buyout : minBuyout, Infinity);
+        value.minPriceMaxStack = value.orders.reduce((minPriceMaxStack, order) => {
+            if (order.buyout < minPriceMaxStack.price) {
+                return {
+                    amount: order.amount,
+                    price: order.buyout
+                }
+            }
+
+            if (order.amount > minPriceMaxStack.amount) {
+                return {
+                    amount: order.amount,
+                    price: order.buyout
+                }
+            }
+
+            return minPriceMaxStack;
+        }, { amount: 0, price: Infinity } as MinPriceMaxStack);
     }
     cache.prices = map;
     return map;

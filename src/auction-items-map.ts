@@ -8,8 +8,13 @@ interface Order {
 
 interface AuctionItem {
     orders: Order[],
-    minStackPrice?: number;
+    minPriceMaxStack: MinPriceMaxStack;
     medianPrice?: number;
+}
+
+export interface MinPriceMaxStack{
+    amount?: number;
+    price?: number;
 }
 
 export interface AuctionItemsMap {
