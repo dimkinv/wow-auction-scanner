@@ -17,7 +17,7 @@ if (fs.existsSync('./records.json')) {
 export function startServer() {
     const app = express()
     app.use(morgan('common'));
-    app.use(bodyParser.json())
+    app.use(bodyParser.json({limit: '50mb'}))
     const port = process.env.PORT || 3000;
 
     app.get('/records', (req, res) => {
