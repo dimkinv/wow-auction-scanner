@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node ./main.js",
-    "compile": "tsc && cp ./package.json ./package-lock.json ./build",
+    "compile": "tsc && cp ./package.json ./package-lock.json ./dist",
     "test": "echo \"Error: no test specified\" && exit 1",
     "scanner:debug": "node --inspect -r ts-node/register src/scanner/scanner.ts \"/Users/dv696w/dimkinv/wow-auction-scanner/examle-data/Auc-ScanData (1).lua\""
   },
@@ -13,6 +13,7 @@
   "license": "ISC",
   "devDependencies": {
     "@types/axios": "^0.14.0",
+    "@types/morgan": "^1.9.2",
     "@types/node": "^14.14.10",
     "ts-node": "^9.1.0",
     "typescript": "^4.1.2"
@@ -25,6 +26,7 @@
     "body-parser": "^1.19.0",
     "express": "^4.17.1",
     "jsontoxml": "^1.0.1",
+    "morgan": "^1.10.0",
     "multer": "^1.4.2",
     "winston": "^3.3.3"
   }

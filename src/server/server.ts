@@ -1,15 +1,22 @@
-import express from 'express';
+import fs from 'fs';
+import express, { json } from 'express';
 import jsontoxml from 'jsontoxml';
 import bodyParser from 'body-parser';
 import { AuctionItemsMap } from '../auction-items-map';
+import morgan from 'morgan';
 
 let cachedRecords: AuctionItemsMap = {};
 
-type Filter = 'names';
+type Filter = 'names' | 'name_prices_pairs';
 type PriceFilter = 'minPrice' | 'median';
+
+if (fs.existsSync('./records.json')) {
+    cachedRecords = JSON.parse(fs.readFileSync('./records.json', 'utf8'));
+}
 
 export function startServer() {
     const app = express()
+    app.use(morgan('common'));
     app.use(bodyParser.json())
     const port = process.env.PORT || 3000;
 
@@ -18,8 +25,20 @@ export function startServer() {
 
         switch (filter) {
             case 'names':
-                const items = jsontoxml(Object.keys(cachedRecords));
-                res.send(items);
+                const names = Object.keys(cachedRecords).map(key => ({ name: 'name', text: key }));
+                res.send(jsontoxml({ names }));
+                break;
+            case 'name_prices_pairs':
+                const records = Object.entries(cachedRecords).map(([key, value]) => ({
+                    name: 'record',
+                    children: {
+                        name: key,
+                        price: value.minPriceMaxStack.price,
+                        amount: value.minPriceMaxStack.amount
+                    }
+                }));
+
+                res.end(jsontoxml({ records }))
                 break;
             default:
                 res.end(jsontoxml(cachedRecords))
@@ -51,6 +70,8 @@ export function startServer() {
     app.post('/records', (req, res) => {
         const records = req.body as AuctionItemsMap;
         cachedRecords = records
+        fs.writeFileSync('./records.json', JSON.stringify(records));
+
         res.end();
     });
 

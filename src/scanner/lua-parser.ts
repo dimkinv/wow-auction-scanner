@@ -28,8 +28,8 @@ export function parseLuaFile(content: string) {
         map[recordArray[8]].orders.push({
             name: recordArray[8],
             amount: recordArray[10],
-            bid: recordArray[14],
-            buyout: recordArray[16],
+            bid: recordArray[14] / 10000,
+            buyout: recordArray[16] / 10000,
             seller: recordArray[19],
         });
     }
@@ -50,14 +50,14 @@ export function parseLuaFile(content: string) {
             if (order.buyout < minPriceMaxStack.price) {
                 return {
                     amount: order.amount,
-                    price: order.buyout
+                    price: order.buyout / order.amount
                 }
             }
 
             if (order.amount > minPriceMaxStack.amount) {
                 return {
                     amount: order.amount,
-                    price: order.buyout
+                    price: order.buyout / order.amount
                 }
             }
 

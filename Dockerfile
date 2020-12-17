@@ -8,7 +8,7 @@ RUN npm run compile
 
 FROM node:lts-alpine
 
-COPY --from=build /opt/app/build /opt/app
+COPY --from=build /opt/app/dist /opt/app
 WORKDIR /opt/app
 RUN npm i --production
-ENTRYPOINT node main.js
+CMD node server/server.js

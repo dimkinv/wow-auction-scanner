@@ -2,7 +2,6 @@ import fs from 'fs';
 import winston from 'winston';
 import axios, { AxiosAdapter, AxiosError } from 'axios';
 
-import { AuctionItemsMap } from '../auction-items-map';
 import { parseLuaFile } from './lua-parser';
 const logger = winston.createLogger({
     format: winston.format.combine(
@@ -26,7 +25,7 @@ export function watchAuctioneerFile(path: string) {
         logger.info(`content parsed with ${Object.keys(map).length} items, sending to server`);
 
         try {
-            const response = await axios.post('http://localhost:3000/records', map, {headers: {'content-type': 'application/json'}});
+            const response = await axios.post('https://nameless-savannah-04031.herokuapp.com/records', map, {headers: {'content-type': 'application/json'}});
             logger.info(`scanner:: send records to server`);
         } catch (error) {
             const axiosError = error as AxiosError

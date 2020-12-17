@@ -1,5 +1,4 @@
 import fs from 'fs';
-import { parseLuaFile, watchAuctioneerFile } from './scanner/lua-parser';
 import { startServer } from './server/server';
 
 async function main(){
