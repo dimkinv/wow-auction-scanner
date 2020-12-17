@@ -1,19 +1,9 @@
 import fs from 'fs';
-import winston from 'winston';
+
 import axios, { AxiosAdapter, AxiosError } from 'axios';
 
 import { parseLuaFile } from './lua-parser';
-const logger = winston.createLogger({
-    format: winston.format.combine(
-        winston.format.timestamp(),
-        winston.format.colorize(),
-        winston.format.simple(),
-        winston.format.metadata()
-    ),
-    transports: new winston.transports.Console({
-        format: winston.format.colorize({})
-    })
-});
+import { logger } from './logger';
 
 
 export function watchAuctioneerFile(path: string) {
@@ -22,7 +12,7 @@ export function watchAuctioneerFile(path: string) {
         const content = fs.readFileSync(path, { encoding: 'utf8' });
         logger.info(`scanner:: file fetched, parsing`);
         const map = parseLuaFile(content);
-        logger.info(`content parsed with ${Object.keys(map).length} items, sending to server`);
+        logger.info(`scanner:: content parsed with ${Object.keys(map).length} items, sending to server`);
 
         try {
             const response = await axios.post('https://nameless-savannah-04031.herokuapp.com/records', map, {headers: {'content-type': 'application/json'}});

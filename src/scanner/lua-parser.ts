@@ -1,15 +1,9 @@
 import fs from 'fs';
 import { AuctionItemsMap, MinPriceMaxStack } from '../auction-items-map';
-
-export const cache: {
-    prices: AuctionItemsMap
-} = {
-    prices: null
-};
-
-
+import { logger } from './logger';
 
 export function parseLuaFile(content: string) {
+    logger.info(`parser:: initiating parse, exrtacting initial values`);
     const reg = /(?<=return {)(.|\s)+(?=,}",\s--)/g;
 
     const relevantData = reg.exec(content)[0];
@@ -21,7 +15,7 @@ export function parseLuaFile(content: string) {
         .replace(/nil/g, null)
         .replace(/,]/g, ']');
 
-    const recordsArray = JSON.parse(`[${parsedData}]`);
+    const recordsArray: any[][] = JSON.parse(`[${parsedData}]`);
     const map: AuctionItemsMap = {};
     for (const recordArray of recordsArray) {
         map[recordArray[8]] = map[recordArray[8]] || { orders: [], minPriceMaxStack: {} };
@@ -33,6 +27,7 @@ export function parseLuaFile(content: string) {
             seller: recordArray[19],
         });
     }
+    logger.info(`parser:: parsing success with ${recordsArray.length} records`);
 
     for (const [name, value] of Object.entries(map)) {
         const numberOfOrders = value.orders.length;
@@ -64,6 +59,6 @@ export function parseLuaFile(content: string) {
             return minPriceMaxStack;
         }, { amount: 0, price: Infinity } as MinPriceMaxStack);
     }
-    cache.prices = map;
+    logger.info(`parser:: parsing complete`);
     return map;
 }
